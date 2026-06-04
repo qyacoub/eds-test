@@ -19,7 +19,7 @@ export const scenarios = [
   {
     n: 1, slug: 'canonical-clean-control', title: 'Old Port of Montreal',
     body: 'Stroll the cobblestone streets of the Old Port along the St. Lawrence River.',
-    canonical: null,
+    canonical: `https://${HOST_TOKEN}/canonical-clean-control`,
     asoExpected: 'clean (control)', semrushExpected: 'clean',
   },
   {
