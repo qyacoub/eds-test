@@ -27,6 +27,9 @@ const LIVE = (p) => `https://admin.hlx.page/live/${ORG}/${SITE}/main/${p}`;
 
 const resolve = (v) => (typeof v === 'string' ? v.replaceAll(HOST_TOKEN, HOST) : v);
 const bySlug = Object.fromEntries(scenarios.map((s) => [s.slug, s]));
+// images are referenced by their DA content-source URL (one per slug); the pipeline
+// rewrites these to optimized delivery images. Referencing the delivery hash directly fails.
+const imgUrl = (slug) => `https://content.da.live/${ORG}/${SITE}/media/${slug}.jpg`;
 
 function metadataBlock({ title, canonical, robots }) {
   const rows = [`<tr><td>title</td><td>${title}</td></tr>`];
@@ -40,7 +43,8 @@ function heroSection(hero, title, alt) {
 }
 
 function proseSection(heading, intro, prose, highlights) {
-  const parts = [`<h2>${heading}</h2>`];
+  const parts = [];
+  if (heading) parts.push(`<h2>${heading}</h2>`);
   if (intro) parts.push(`<p><strong>${intro}</strong></p>`);
   (prose || []).forEach((p) => parts.push(`<p>${p}</p>`));
   if (highlights && highlights.length) {
@@ -69,7 +73,7 @@ function wrap(sections, meta) {
 function nearbyOf(slug) {
   const idx = scenarios.findIndex((s) => s.slug === slug);
   return [1, 2, 3].map((d) => scenarios[(idx + d) % scenarios.length]).map((s) => ({
-    slug: s.slug, title: s.title, hero: content[s.slug].hero, blurb: content[s.slug].intro,
+    slug: s.slug, title: s.title, hero: imgUrl(s.slug), blurb: content[s.slug].intro,
   }));
 }
 
@@ -79,8 +83,8 @@ const pages = [];
 for (const s of scenarios) {
   const c = content[s.slug];
   const sections = [
-    heroSection(c.hero, s.title),
-    proseSection(s.title, c.intro, c.prose, c.highlights),
+    heroSection(imgUrl(s.slug), s.title),
+    proseSection('', c.intro, c.prose, c.highlights),
     cardsSection('Nearby & related', nearbyOf(s.slug)),
   ];
   if (c.tip) sections.push(tipSection(c.tip));
@@ -93,9 +97,9 @@ for (const s of scenarios) {
   const c = content.home;
   const top = ['canonical-clean-control', 'canonical-missing', 'canonical-cross-domain',
     'canonical-different-subdomain', 'canonical-uppercase-url', 'canonical-not-self-referencing']
-    .map((slug) => ({ slug, title: bySlug[slug].title, hero: content[slug].hero, blurb: content[slug].intro }));
+    .map((slug) => ({ slug, title: bySlug[slug].title, hero: imgUrl(slug), blurb: content[slug].intro }));
   const sections = [
-    heroSection(c.hero, 'Visiting Montréal'),
+    heroSection(imgUrl('home'), 'Visiting Montréal'),
     proseSection('Bonjour-hi! Welcome to Montréal', c.intro, c.prose, []),
     cardsSection('Top things to do', top),
   ];
@@ -106,7 +110,7 @@ for (const s of scenarios) {
 for (const slug of ['about', 'contact']) {
   const c = content[slug];
   const title = slug === 'about' ? 'About Visiting Montréal' : 'Contact Us';
-  const sections = [heroSection(c.hero, title), proseSection(title, c.intro, c.prose, c.highlights)];
+  const sections = [heroSection(imgUrl(slug), title), proseSection('', c.intro, c.prose, c.highlights)];
   pages.push({ path: slug, html: wrap(sections, metadataBlock({ title, canonical: `https://${HOST}/${slug}` })) });
 }
 

@@ -38,7 +38,7 @@ defect (self-documenting in audit output); content is Montreal travel copy.
 | 10 | canonical-target-4xx | Underground City | → 404 | `https://__PROD_HOST__/this-target-does-not-exist-404` | 4xx | Broken |
 | 11 | canonical-target-redirect | Day Trips | → 301 | `https://__PROD_HOST__/redirect-source` | 3xx redirect | depends |
 | 12 | canonical-target-noindex | Nightlife | → 200 noindex | `https://__PROD_HOST__/noindex-target` | **MISS (gap)** | Invalid (conflict) |
-| 13 | canonical-target-5xx | Museums | → 5xx | `https://httpstat.us/500` | 5xx | Broken |
+| 13 | canonical-target-5xx | Museums | → 5xx | `https://httpbin.org/status/503` | 5xx | Broken |
 | 14 | canonical-multiple-tags | Neighborhoods | 2 identical tags | injector | multiple | likely Invalid |
 | 15 | canonical-conflicting-tags | Food Scene | 2 tags, diff href | injector | multiple (not "conflicting") | Invalid (conflict) |
 | 16 | canonical-outside-head | BIXI Cycling | tag in `<body>` | injector | outside-head | depends |
