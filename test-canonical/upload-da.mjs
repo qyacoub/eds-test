@@ -1,107 +1,134 @@
 /*
- * Uploads the 19 canonical test pages (+ helpers + index) to Document Authoring and previews them.
+ * Authors the full "Visiting Montréal" site in Document Authoring and previews/publishes it:
+ *  - 19 rich scenario pages (hero + intro + prose + highlights + nearby cards + tip),
+ *    each keeping its planted canonical DEFECT (from scenarios.mjs) unchanged
+ *  - polished Home (index), About, Contact (clean self-ref canonical)
+ *  - noindex-target helper (canonical target for scenario 12)
  *
  * Usage:
  *   DA_TOKEN=$(cat /tmp/da_tok) HLX_TOKEN=$(cat /tmp/hlx_adobe) \
  *   node test-canonical/upload-da.mjs <host>
  *
- * <host> is the canonical base host WITHOUT protocol (default: the .aem.page preview host).
- * Replace later with the real custom domain and re-run to re-point canonicals.
- *
- * Requires Node 18+ (global fetch/FormData/Blob).
+ * <host> = production host WITHOUT protocol (e.g. quentin-eds-test.ca). Requires Node 18+.
  */
 import { scenarios, helperPages, HOST_TOKEN } from './scenarios.mjs';
+import { content } from './content.mjs';
 
 const ORG = 'qyacoub';
 const SITE = 'eds-test';
 const HOST = process.argv[2] || `main--${SITE}--${ORG}.aem.page`;
 const DA_TOKEN = process.env.DA_TOKEN;
 const HLX_TOKEN = process.env.HLX_TOKEN;
-if (!DA_TOKEN || !HLX_TOKEN) throw new Error('Set DA_TOKEN and HLX_TOKEN env vars');
+if (!DA_TOKEN || !HLX_TOKEN) throw new Error('Set DA_TOKEN and HLX_TOKEN');
 
-const DA_SOURCE = (path) => `https://admin.da.live/source/${ORG}/${SITE}/${path}.html`;
-const PREVIEW = (path) => `https://admin.hlx.page/preview/${ORG}/${SITE}/main/${path}`;
+const SOURCE = (p) => `https://admin.da.live/source/${ORG}/${SITE}/${p}.html`;
+const PREVIEW = (p) => `https://admin.hlx.page/preview/${ORG}/${SITE}/main/${p}`;
+const LIVE = (p) => `https://admin.hlx.page/live/${ORG}/${SITE}/main/${p}`;
 
-function resolve(val) {
-  return typeof val === 'string' ? val.replaceAll(HOST_TOKEN, HOST) : val;
+const resolve = (v) => (typeof v === 'string' ? v.replaceAll(HOST_TOKEN, HOST) : v);
+const bySlug = Object.fromEntries(scenarios.map((s) => [s.slug, s]));
+
+function metadataBlock({ title, canonical, robots }) {
+  const rows = [`<tr><td>title</td><td>${title}</td></tr>`];
+  if (canonical !== undefined) rows.push(`<tr><td>canonical</td><td>${resolve(canonical) ?? ''}</td></tr>`);
+  if (robots) rows.push(`<tr><td>robots</td><td>${robots}</td></tr>`);
+  return `<table>\n<tr><td>Metadata</td></tr>\n${rows.join('\n')}\n</table>`;
 }
 
-function metaRow(k, v) {
-  // DA represents blocks as HTML tables: each <tr> is a row, each <td> a cell.
-  return `<tr><td>${k}</td><td>${v ?? ''}</td></tr>`;
+function heroSection(hero, title, alt) {
+  return `<div>\n<p><img src="${hero}" alt="${alt || title}"></p>\n<h1>${title}</h1>\n</div>`;
 }
 
-function daHtml({ title, body, canonical, robots }) {
-  const rows = [metaRow('title', title)];
-  // undefined => no row (control + injector pages); '' => empty row (missing); string => value
-  if (canonical !== undefined) rows.push(metaRow('canonical', resolve(canonical)));
-  if (robots) rows.push(metaRow('robots', robots));
-  return `<body>
-<main>
-<div>
-<h1>${title}</h1>
-<p>${body}</p>
-<table>
-<tr><td>Metadata</td></tr>
-${rows.join('\n')}
-</table>
-</div>
-</main>
-</body>`;
+function proseSection(heading, intro, prose, highlights) {
+  const parts = [`<h2>${heading}</h2>`];
+  if (intro) parts.push(`<p><strong>${intro}</strong></p>`);
+  (prose || []).forEach((p) => parts.push(`<p>${p}</p>`));
+  if (highlights && highlights.length) {
+    parts.push('<h3>Highlights</h3>');
+    parts.push(`<ul>\n${highlights.map((h) => `<li>${h}</li>`).join('\n')}\n</ul>`);
+  }
+  return `<div>\n${parts.join('\n')}\n</div>`;
 }
 
-async function uploadSource(path, html) {
-  const fd = new FormData();
-  fd.append('data', new Blob([html], { type: 'text/html' }), `${path}.html`);
-  const res = await fetch(DA_SOURCE(path), {
-    method: 'POST', headers: { Authorization: `Bearer ${DA_TOKEN}` }, body: fd,
-  });
-  return res.status;
+function cardsSection(heading, items) {
+  const rows = items.map((it) => `<tr><td><img src="${it.hero}" alt="${it.title}"></td><td><h3><a href="/${it.slug}">${it.title}</a></h3><p>${it.blurb}</p></td></tr>`);
+  return `<div>\n<h2>${heading}</h2>\n<table>\n<tr><td>Cards</td></tr>\n${rows.join('\n')}\n</table>\n</div>`;
 }
 
-async function preview(path) {
-  const res = await fetch(PREVIEW(path), {
-    method: 'POST', headers: { 'x-auth-token': HLX_TOKEN },
-  });
-  return res.status;
+function tipSection(tip) {
+  return `<div>\n<blockquote><p><strong>Travel tip:</strong> ${tip}</p></blockquote>\n</div>`;
+}
+
+function wrap(sections, meta) {
+  // metadata must live INSIDE a section <div> (its own section) to be recognized as a block
+  const all = [...sections, `<div>\n${meta}\n</div>`];
+  return `<body>\n<main>\n${all.join('\n<hr>\n')}\n</main>\n</body>`;
+}
+
+// nearby = next 3 scenarios (cyclic) for internal-link cards
+function nearbyOf(slug) {
+  const idx = scenarios.findIndex((s) => s.slug === slug);
+  return [1, 2, 3].map((d) => scenarios[(idx + d) % scenarios.length]).map((s) => ({
+    slug: s.slug, title: s.title, hero: content[s.slug].hero, blurb: content[s.slug].intro,
+  }));
 }
 
 const pages = [];
-for (const s of scenarios) {
-  pages.push({
-    path: s.slug,
-    html: daHtml({
-      title: s.title,
-      body: s.body,
-      canonical: s.injector ? undefined : s.canonical, // injector pages: no canonical meta
-    }),
-  });
-}
-for (const h of helperPages) {
-  pages.push({ path: h.slug, html: daHtml(h) });
-}
-// index linking all pages for crawl discovery
-const links = scenarios.map((s) => `<li><a href="/${s.slug}">${s.n}. ${s.title}</a></li>`).join('\n');
-pages.push({
-  path: 'index',
-  html: `<body>
-<main>
-<div>
-<h1>Visiting Montreal — Canonical Test Site</h1>
-<p>Test pages for the ASO x SemRush canonical detection comparison.</p>
-<ul>
-${links}
-</ul>
-</div>
-</main>
-</body>`,
-});
 
-console.log(`Host base for canonicals: ${HOST}\nUploading ${pages.length} pages...\n`);
+// 19 scenario pages
+for (const s of scenarios) {
+  const c = content[s.slug];
+  const sections = [
+    heroSection(c.hero, s.title),
+    proseSection(s.title, c.intro, c.prose, c.highlights),
+    cardsSection('Nearby & related', nearbyOf(s.slug)),
+  ];
+  if (c.tip) sections.push(tipSection(c.tip));
+  const meta = metadataBlock({ title: s.title, canonical: s.injector ? undefined : s.canonical });
+  pages.push({ path: s.slug, html: wrap(sections, meta) });
+}
+
+// Home (index)
+{
+  const c = content.home;
+  const top = ['canonical-clean-control', 'canonical-missing', 'canonical-cross-domain',
+    'canonical-different-subdomain', 'canonical-uppercase-url', 'canonical-not-self-referencing']
+    .map((slug) => ({ slug, title: bySlug[slug].title, hero: content[slug].hero, blurb: content[slug].intro }));
+  const sections = [
+    heroSection(c.hero, 'Visiting Montréal'),
+    proseSection('Bonjour-hi! Welcome to Montréal', c.intro, c.prose, []),
+    cardsSection('Top things to do', top),
+  ];
+  pages.push({ path: 'index', html: wrap(sections, metadataBlock({ title: 'Visiting Montréal — Travel Guide', canonical: `https://${HOST}/` })) });
+}
+
+// About + Contact (clean self-ref canonical)
+for (const slug of ['about', 'contact']) {
+  const c = content[slug];
+  const title = slug === 'about' ? 'About Visiting Montréal' : 'Contact Us';
+  const sections = [heroSection(c.hero, title), proseSection(title, c.intro, c.prose, c.highlights)];
+  pages.push({ path: slug, html: wrap(sections, metadataBlock({ title, canonical: `https://${HOST}/${slug}` })) });
+}
+
+// noindex-target helper (canonical target for scenario 12) — minimal, robots noindex
+for (const h of helperPages) {
+  const sections = [`<div>\n<h1>${h.title}</h1>\n<p>${h.body}</p>\n</div>`];
+  pages.push({ path: h.slug, html: wrap(sections, metadataBlock({ title: h.title, robots: h.robots })) });
+}
+
+async function post(url, headers, body) {
+  const res = await fetch(url, { method: 'POST', headers, body });
+  return res.status;
+}
+
+console.log(`Authoring ${pages.length} pages (host=${HOST})\n`);
 for (const p of pages) {
   /* eslint-disable no-await-in-loop */
-  const up = await uploadSource(p.path, p.html);
-  const pv = await preview(p.path);
-  console.log(`${p.path.padEnd(34)} upload=${up} preview=${pv}`);
+  const fd = new FormData();
+  fd.append('data', new Blob([p.html], { type: 'text/html' }), `${p.path}.html`);
+  const up = await post(SOURCE(p.path), { Authorization: `Bearer ${DA_TOKEN}` }, fd);
+  const pv = await post(PREVIEW(p.path), { 'x-auth-token': HLX_TOKEN });
+  const lv = await post(LIVE(p.path), { 'x-auth-token': HLX_TOKEN });
+  console.log(`${p.path.padEnd(34)} upload=${up} preview=${pv} live=${lv}`);
 }
 console.log('\nDone.');
