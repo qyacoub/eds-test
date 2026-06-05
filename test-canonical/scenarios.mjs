@@ -91,7 +91,7 @@ export const scenarios = [
   {
     n: 13, slug: 'canonical-target-5xx', title: 'Montreal Museums',
     body: 'The MMFA, Pointe-a-Calliere and the McCord Stewart Museum.',
-    canonical: 'https://httpbin.org/status/503',
+    canonical: `https://${HOST_TOKEN}/server-error-500`,
     asoExpected: '5xx', semrushExpected: 'Broken',
   },
 

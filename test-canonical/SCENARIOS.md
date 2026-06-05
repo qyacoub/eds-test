@@ -20,6 +20,8 @@ defect (self-documenting in audit output); content is Montreal travel copy.
    upload via the DA admin API. Preview + publish all.
 4. Add an EDS **redirects** sheet entry: `/redirect-source` → `/canonical-clean-control` (301) for #11.
 5. Confirm `/noindex-target` publishes with `robots: noindex` (helper for #12).
+5b. Add a Cloudflare Worker route returning **503** for `/server-error-500` (helper for #13), then
+    point #13's canonical at `https://<domain>/server-error-500`. (No DA page for this path.)
 6. Ensure every page is linked from the index/nav and present in the sitemap (SemRush discovery).
 
 ## Scenario matrix
@@ -38,7 +40,7 @@ defect (self-documenting in audit output); content is Montreal travel copy.
 | 10 | canonical-target-4xx | Underground City | → 404 | `https://__PROD_HOST__/this-target-does-not-exist-404` | 4xx | Broken |
 | 11 | canonical-target-redirect | Day Trips | → 301 | `https://__PROD_HOST__/redirect-source` | 3xx redirect | depends |
 | 12 | canonical-target-noindex | Nightlife | → 200 noindex | `https://__PROD_HOST__/noindex-target` | **MISS (gap)** | Invalid (conflict) |
-| 13 | canonical-target-5xx | Museums | → 5xx | `https://httpbin.org/status/503` | 5xx | Broken |
+| 13 | canonical-target-5xx | Museums | → 5xx | `https://__PROD_HOST__/server-error-500` (Cloudflare Worker returns 503) | 5xx | Broken |
 | 14 | canonical-multiple-tags | Neighborhoods | 2 identical tags | injector | multiple | likely Invalid |
 | 15 | canonical-conflicting-tags | Food Scene | 2 tags, diff href | injector | multiple (not "conflicting") | Invalid (conflict) |
 | 16 | canonical-outside-head | BIXI Cycling | tag in `<body>` | injector | outside-head | depends |
