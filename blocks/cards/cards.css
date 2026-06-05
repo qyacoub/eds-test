@@ -3,17 +3,40 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(257px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 28px;
 }
 
 .cards > ul > li {
-  border: 1px solid #dadada;
-  background-color: var(--background-color);
+  border: 1px solid rgb(20 37 59 / 8%);
+  border-radius: 14px;
+  background-color: #fff;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgb(20 37 59 / 6%);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cards > ul > li:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgb(20 37 59 / 14%);
 }
 
 .cards .cards-card-body {
-  margin: 16px;
+  margin: 20px;
+}
+
+.cards .cards-card-body h3 {
+  margin-top: 0;
+  font-size: var(--heading-font-size-m);
+}
+
+.cards .cards-card-body p {
+  color: var(--text-color);
+}
+
+.cards .cards-card-body a {
+  font-weight: 600;
+  color: var(--accent-color);
 }
 
 .cards .cards-card-image {
@@ -22,6 +45,6 @@
 
 .cards > ul > li img {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 3 / 2;
   object-fit: cover;
 }
