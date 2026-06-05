@@ -4,6 +4,8 @@ header .nav-wrapper {
   width: 100%;
   z-index: 2;
   position: fixed;
+  border-bottom: 1px solid rgb(20 37 59 / 8%);
+  box-shadow: 0 1px 10px rgb(20 37 59 / 5%);
 }
 
 header nav {
@@ -143,9 +145,13 @@ header nav[aria-expanded='true'] .nav-hamburger-icon::after {
 header .nav-brand {
   grid-area: brand;
   flex-basis: 128px;
-  font-size: var(--heading-font-size-s);
+  font-family: var(--heading-font-family);
+  font-size: var(--heading-font-size-m);
   font-weight: 700;
   line-height: 1;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--navy-color);
 }
 
 header nav .nav-brand img {
@@ -269,4 +275,35 @@ header nav .nav-sections ul > li > ul > li {
 /* tools */
 header nav .nav-tools {
   grid-area: tools;
+}
+
+/* ---- travel-magazine header polish ---- */
+header .nav-brand strong {
+  color: var(--accent-color);
+}
+
+header nav .nav-sections a:any-link {
+  transition: color 0.15s ease;
+}
+
+header nav .nav-sections a:hover {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+@media (width >= 900px) {
+  header nav .nav-sections .default-content-wrapper > ul > li[aria-expanded='true'] > ul {
+    border-radius: 10px;
+    box-shadow: 0 12px 28px rgb(20 37 59 / 14%);
+    background-color: #fff;
+    width: 230px;
+  }
+
+  header nav .nav-sections .default-content-wrapper > ul > li > ul::before {
+    border-bottom-color: #fff;
+  }
+
+  header nav .nav-sections .default-content-wrapper > ul > li > ul > li {
+    padding: 6px 0;
+  }
 }

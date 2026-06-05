@@ -11,13 +11,17 @@
  */
 
 :root {
-  /* colors */
-  --background-color: white;
-  --light-color: #f8f8f8;
-  --dark-color: #505050;
-  --text-color: #131313;
-  --link-color: #3b63fb;
-  --link-hover-color: #1d3ecf;
+  /* colors — "Visiting Montréal" travel-magazine theme */
+  --background-color: #fffdf9;        /* warm off-white */
+  --light-color: #f4efe7;             /* warm light section bg */
+  --dark-color: #14253b;              /* deep navy */
+  --text-color: #21303f;              /* navy-charcoal body text */
+  --accent-color: #e76f51;            /* coral (primary accent) */
+  --accent-hover-color: #c9502f;
+  --secondary-color: #2a9d8f;         /* teal */
+  --navy-color: #1d3557;
+  --link-color: #c9502f;              /* readable coral for inline links */
+  --link-hover-color: #a23d22;
 
   /* fonts */
   --body-font-family: roboto, roboto-fallback, sans-serif;
@@ -254,17 +258,18 @@ button.button.secondary:disabled:focus-visible {
 /* high-impact call-to-action */
 a.button.accent,
 button.button.accent {
-  border-color: var(--link-color);
-  background-color: var(--link-color);
-  color: var(--background-color);
+  border-color: var(--accent-color);
+  background-color: var(--accent-color);
+  color: #fff;
 }
 
 a.button.accent:hover,
 a.button.accent:focus-visible,
 button.button.accent:hover,
 button.button.accent:focus-visible {
-  border-color: var(--link-hover-color);
-  background-color: var(--link-hover-color);
+  border-color: var(--accent-hover-color);
+  background-color: var(--accent-hover-color);
+  color: #fff;
 }
 
 a.button.accent[aria-disabled="true"],
@@ -321,5 +326,58 @@ main .section.light,
 main .section.highlight {
   background-color: var(--light-color);
   margin: 0;
-  padding: 40px 0;
+  padding: 48px 0;
+}
+
+main .section.highlight {
+  background-color: var(--navy-color);
+  color: #fff;
+}
+
+main .section.highlight a:any-link {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* ---- travel-magazine theme polish ---- */
+h1,
+h2,
+h3 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* eyebrow / section lead-in: an h3 immediately followed by an h2 reads as a kicker */
+main .section h2 {
+  position: relative;
+}
+
+/* accent rule under top-level section headings */
+main .section > div > h2:first-child::after {
+  content: "";
+  display: block;
+  width: 56px;
+  height: 4px;
+  margin-top: 12px;
+  border-radius: 2px;
+  background: var(--accent-color);
+}
+
+/* simple "tips" callout: a blockquote styled as an info card */
+main blockquote {
+  margin: 24px 0;
+  border-left: 4px solid var(--secondary-color);
+  border-radius: 8px;
+  padding: 16px 20px;
+  background: var(--light-color);
+  font-style: normal;
+}
+
+main blockquote p {
+  margin: 0.25em 0;
+}
+
+/* readable prose width for default content */
+main .section > div > p {
+  max-width: 70ch;
 }
