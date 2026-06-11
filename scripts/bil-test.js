@@ -29,6 +29,12 @@ function run() {
         + '<button type="submit">Sign up</button>';
       injectInto('main', form);
     },
+    // #11 — broken <img src> to a missing internal image (static authoring → about:error)
+    '/bil-broken-image': () => {
+      const p = document.createElement('p');
+      p.innerHTML = '<img src="/bil-missing-image.png" alt="Featured product" width="320" height="200">';
+      injectInto('main', p);
+    },
     // #9 — image map <area href> to a deleted page
     '/bil-imagemap-area-404': () => {
       const wrap = document.createElement('p');
