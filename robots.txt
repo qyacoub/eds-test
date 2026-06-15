@@ -1,0 +1,7 @@
+User-Agent: *
+Allow: /
+# Scenario #20 (canonical-target-robots-blocked): this target is intentionally blocked so a
+# canonical pointing at it tests "canonical -> robots.txt-disallowed target" detection.
+Disallow: /robots-blocked-target
+
+Sitemap: https://quentin-eds-test.ca/sitemap.xml
