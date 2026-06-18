@@ -3,10 +3,20 @@ coverage/*
 logs/*
 node_modules/*
 
+# Secrets — never commit (repo is public)
+.env
+.env.*
+
 helix-importer-ui
 .DS_Store
 *.bak
+*.orig
 .idea
+
+# Benchmark/authoring tooling — kept OUT of this public repo (lives in the private
+# experience-success-skills repo). Stays on disk locally; never published here.
+test-canonical/
+cloudflare-worker/
 
 # Ensure these files are tracked
 !CLAUDE.md
