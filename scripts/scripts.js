@@ -127,6 +127,21 @@ export function decorateMain(main) {
 }
 
 /**
+ * Loads path-scoped test/benchmark injectors.
+ * These modules plant structural SEO defects (canonical / broken-internal-link scenarios)
+ * into the rendered DOM and only ever act on their own /canonical-* and /bil-* pages, so they
+ * are imported only on those pages instead of shipping on every page request. TEST ONLY.
+ */
+function loadTestInjectors() {
+  const { pathname } = window.location;
+  if (pathname.startsWith('/canonical-')) {
+    import('./canonical-test.js');
+  } else if (pathname.startsWith('/bil-')) {
+    import('./bil-test.js');
+  }
+}
+
+/**
  * Loads everything needed to get to LCP.
  * @param {Element} doc The container element
  */
@@ -136,6 +151,7 @@ async function loadEager(doc) {
   const main = doc.querySelector('main');
   if (main) {
     decorateMain(main);
+    loadTestInjectors();
     document.body.classList.add('appear');
     await loadSection(main.querySelector('.section'), waitForFirstImage);
   }

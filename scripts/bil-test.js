@@ -3,8 +3,9 @@
  *
  * Plants STRUCTURAL link defects that the EDS authoring pipeline strips from content
  * (form / area+map / iframe / script / link[rel=alternate] / a[rel=nofollow]). These are injected
- * into the rendered DOM, keyed by pathname, so ASO's rendered-DOM scrape can see them. SemRush only
- * has the same chance with JS-rendering ON — whether it still ignores JS-injected links is a finding.
+ * into the rendered DOM, keyed by pathname, so ASO's rendered-DOM scrape can see them. SemRush
+ * only has the same chance with JS-rendering ON — whether it still ignores JS-injected links is
+ * a finding.
  *
  * Anchor/img/canonical scenarios are authored statically (content.mjs prose / Metadata block) and
  * are NOT handled here. This script only fires on the six injected `bil-*` pages below; every other
