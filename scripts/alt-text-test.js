@@ -6,7 +6,13 @@
  * missing/empty/generic/long/control conditions for ASO and SemRush with JS rendering enabled.
  */
 
-const MEDIA = 'https://content.da.live/qyacoub/eds-test/media';
+const MEDIA = {
+  missing: '/media_175631ded1a4aca0f54f0cece60379c817a4d9f6a.jpg?width=750&format=jpg&optimize=medium',
+  empty: '/media_132f331ce6c2168700557e2f0a43116d1f0e77050.jpg?width=750&format=jpg&optimize=medium',
+  generic: '/media_1694ba798cce8b565f1413a3f2d4d477c469d8bca.jpg?width=750&format=jpg&optimize=medium',
+  long: '/media_18a3fefd89e6b17086d3fe087da755ae6fde857ad.jpg?width=750&format=jpg&optimize=medium',
+  valid: '/media_1ad0de4962627e5d7d20286b98147999ac582667c.jpg?width=750&format=jpg&optimize=medium',
+};
 
 function injectImage({ src, alt, caption }) {
   const host = document.querySelector('main') || document.body;
@@ -32,21 +38,21 @@ function run() {
 
   const fixtures = {
     '/alt-text-missing': {
-      src: `${MEDIA}/alt-text-5.jpg`,
+      src: MEDIA.missing,
       caption: 'Missing alt attribute fixture',
     },
     '/alt-text-empty': {
-      src: `${MEDIA}/alt-text-1.jpg`,
+      src: MEDIA.empty,
       alt: '',
       caption: 'Empty alt attribute fixture',
     },
     '/alt-text-generic': {
-      src: `${MEDIA}/alt-text-2.jpg`,
+      src: MEDIA.generic,
       alt: 'image',
       caption: 'Generic alt text fixture',
     },
     '/alt-text-long': {
-      src: `${MEDIA}/alt-text-3.jpg`,
+      src: MEDIA.long,
       alt: longAlt,
       caption: 'Long alt text fixture',
     },
@@ -55,7 +61,7 @@ function run() {
       caption: 'Broken image with missing alt fixture',
     },
     '/alt-text-valid-control': {
-      src: `${MEDIA}/alt-text-4.jpg`,
+      src: MEDIA.valid,
       alt: 'A plate of classic Quebec poutine with cheese curds and gravy',
       caption: 'Valid descriptive alt fixture',
     },
