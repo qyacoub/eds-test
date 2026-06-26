@@ -39,7 +39,7 @@ function run() {
       styles: { color: '#1a1a1a', fontSize: '16px' },
     }),
     // #8e8e8e on #fff ≈ 3.3:1, NORMAL 16px → fails the 4.5:1 minimum → color-contrast violation.
-    '/cc-normal-below-4.5': () => addBlock({
+    '/cc-normal-below-4-5': () => addBlock({
       text: 'Membership renews annually; you can cancel anytime from your account page.',
       styles: { color: '#8e8e8e', fontSize: '16px' },
     }),
