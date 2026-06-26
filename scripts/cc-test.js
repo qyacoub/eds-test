@@ -48,7 +48,7 @@ function run() {
       text: 'Please keep noise to a minimum in the reading room.',
       styles: { color: '#767676', fontSize: '16px' },
     }),
-    // #8e8e8e ≈ 3.3:1 but LARGE 28px → passes via the large-text 3:1 exception → must NOT be flagged.
+    // #8e8e8e ≈ 3.3:1 but LARGE 28px → passes the large-text 3:1 exception; must NOT be flagged.
     '/cc-large-3to1-pass': () => addBlock({
       text: 'Summer hours: 10am to 8pm',
       styles: { color: '#8e8e8e', fontSize: '28px', fontWeight: '400' },
