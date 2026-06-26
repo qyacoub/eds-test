@@ -128,9 +128,10 @@ export function decorateMain(main) {
 
 /**
  * Loads path-scoped test/benchmark injectors.
- * These modules plant structural SEO defects (canonical / broken-internal-link scenarios)
- * into the rendered DOM and only ever act on their own /canonical-* and /bil-* pages, so they
- * are imported only on those pages instead of shipping on every page request. TEST ONLY.
+ * These modules plant structural SEO / accessibility defects (canonical / broken-internal-link /
+ * color-contrast scenarios) into the rendered DOM and only ever act on their own /canonical-*,
+ * /bil-* and /cc-* pages, so they are imported only on those pages instead of shipping on every
+ * page request. TEST ONLY.
  */
 function loadTestInjectors() {
   const { pathname } = window.location;
@@ -138,6 +139,8 @@ function loadTestInjectors() {
     import('./canonical-test.js');
   } else if (pathname.startsWith('/bil-')) {
     import('./bil-test.js');
+  } else if (pathname.startsWith('/cc-')) {
+    import('./cc-test.js');
   }
 }
 
