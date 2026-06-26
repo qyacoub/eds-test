@@ -128,9 +128,10 @@ export function decorateMain(main) {
 
 /**
  * Loads path-scoped test/benchmark injectors.
- * These modules plant structural SEO defects (canonical / broken-internal-link / alt-text scenarios)
- * into the rendered DOM and only ever act on their own benchmark pages, so they
- * are imported only on those pages instead of shipping on every page request. TEST ONLY.
+ * These modules plant structural SEO / accessibility defects (canonical / broken-internal-link /
+ * alt-text / color-contrast scenarios) into the rendered DOM and only ever act on their own
+ * /canonical-*, /bil-*, /alt-text-* and /cc-* pages, so they are imported only on those pages
+ * instead of shipping on every page request. TEST ONLY.
  */
 function loadTestInjectors() {
   const { pathname } = window.location;
@@ -140,6 +141,8 @@ function loadTestInjectors() {
     import('./bil-test.js');
   } else if (pathname.startsWith('/alt-text-')) {
     import('./alt-text-test.js');
+  } else if (pathname.startsWith('/cc-')) {
+    import('./cc-test.js');
   }
 }
 
