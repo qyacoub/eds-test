@@ -250,7 +250,7 @@ export default async function decorate(block) {
 
   const status = el('div', { class: 'wf-status', role: 'status', 'aria-live': 'polite' });
   const fields = el('div', { class: 'wf-fields' });
-  const submitButton = el('button', { type: 'submit', class: 'button', text: 'Send request' });
+  const submitButton = el('button', { type: 'submit', class: 'button primary', text: 'Send request' });
   const formEl = el(
     'form',
     { class: 'wf-form', novalidate: true, 'aria-labelledby': 'wf-title' },

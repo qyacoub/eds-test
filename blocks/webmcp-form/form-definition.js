@@ -96,7 +96,8 @@ export default {
       label: { value: 'Estimated accommodation total (CAD)' },
       description: 'Calculated from nights and neighbourhood.',
       rules: {
-        value: "nights * if(neighbourhood == 'old-montreal', 240, if(neighbourhood == 'downtown', 220, if(neighbourhood == 'mile-end', 160, 180)))",
+        // Empty until nights is filled; Plateau rate ($180) until a neighbourhood is chosen.
+        value: "if(nights, nights * if(neighbourhood == 'old-montreal', 240, if(neighbourhood == 'downtown', 220, if(neighbourhood == 'mile-end', 160, 180))), null)",
       },
     },
     {
