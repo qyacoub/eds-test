@@ -1,0 +1,3 @@
+Meta Title & Affected Page - Primary row,Meta Title & Affected Page - Secondary row,[Image] URL ([Image] The plain and complete URL we found during the analysis.),Status (The status of the issue.),[Image] Status Code ([Image] The HTTP status code is the most important part of the server response header. It tells the browser or search engine if the requested URL could be processed and/or what to do next.),Segment
+Product Gallery,https://quentin-eds-test.ca/bil-broken-image,https://quentin-eds-test.ca/bil-missing-image.png,new,404,No Segment
+Interactive Campus Map,https://quentin-eds-test.ca/bil-imagemap-area-404,https://quentin-eds-test.ca/bil-missing-image.png,new,404,No Segment

@@ -1,0 +1,5 @@
+Affected Page - Primary row,Affected Page - Secondary row,Link Anchor Text (The visible text content of the link.),Status (The status of the issue.),[Target] URL ([Target] The plain and complete URL we found during the analysis.),[Target] Status Code ([Target] The HTTP status code is the most important part of the server response header. It tells the browser or search engine if the requested URL could be processed and/or what to do next.)
+Discontinued Programs,https://quentin-eds-test.ca/bil-gone-410,discontinued program,new,https://quentin-eds-test.ca/bil-gone-410-target,410
+Seasonal Events Guide,https://quentin-eds-test.ca/bil-anchor-404,events archive,new,https://quentin-eds-test.ca/bil-deleted-page,404
+Members-Only Resources,https://quentin-eds-test.ca/bil-forbidden-403,members-only library,new,https://quentin-eds-test.ca/bil-forbidden-403-target,403
+Service Status,https://quentin-eds-test.ca/bil-server-5xx,service status page,new,https://quentin-eds-test.ca/bil-server-5xx-target,503

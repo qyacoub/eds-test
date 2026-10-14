@@ -1,0 +1,87 @@
+<h2>Broken internal links detection — controlled head-to-head (deep dive)</h2>
+<p>To compare internal-link <em>detection</em> on a like-for-like basis, I reused the controlled AEM Edge Delivery test site <a class="external-link" href="https://quentin-eds-test.ca">quentin-eds-test.ca</a> and added a <strong>one-isolated-defect-per-page matrix for broken internal links</strong> (the slug names the defect; content is a believable site). Because every defect is planted by design, the scenario column <em>is</em> the known ground truth; each tool is scored against it. Status-code targets (410 / 403 / 503, a 302 temporary redirect, a 301→404 broken redirect, and a 302 loop) are served by a Cloudflare worker so they resolve identically for both crawlers; structural link surfaces the CMS pipeline strips (form / image-map area / iframe) are injected into the rendered DOM, which ASO scrapes.</p>
+<ul>
+<li><strong>ASO</strong> = production <code>spacecat-audit-worker</code> <code>src/internal-links</code> (crawl path: scrape rendered DOM → extract links → HTTP HEAD/GET probe → classify status bucket). The net-new Mystique Preflight DOM checks (<code>missing-href</code>, <code>insecure-link</code>) are <em>not</em> credited to ASO.</li>
+<li><strong>SemRush</strong> = Enterprise Site Intelligence (JS-rendering ON) — combines its <em>Internal Broken Links</em>, <em>Redirect Chains</em>, <em>Temporary / Broken Redirects</em>, <em>Orphaned Pages</em>, <em>Pages with Few Incoming Links</em>, and <em>Internal Nofollow</em> issue reports.</li>
+</ul>
+<p><strong>Scope (two tiers).</strong> The head-to-head (<strong>Tier 1</strong>) scores internal-link health — a link that resolves to an error or redirect state, or carries a crawl-blocking <code>nofollow</code> attribute. <strong>Tier 2</strong> (internal-linking <em>structure</em>: orphaned / few-inlinks) is reported separately: whole-site link-graph capability SemRush has that this ASO opportunity does not yet check.</p>
+<h3>Scorecard (Tier 1 — internal-link health)</h3>
+<p><strong>Scoring rubric</strong> (equal weight, ground truth = planted defect): each scenario scores <strong>2</strong> = correct &amp; specific, <strong>1</strong> = partial (flagged but mislabeled/generic), <strong>0</strong> = missed. <em>Coverage</em> = share scoring ≥1; <em>Accuracy</em> = points ÷ 24; <em>Precision</em> = correct-primary flags ÷ total flags emitted. <strong>Overall = harmonic mean of Accuracy and Precision</strong> (an F1-style blend: a tool can't win by flagging everything <em>or</em> almost nothing).</p>
+<p>This evaluation scopes the <strong>auto-detect</strong> layer: how completely and how <em>specifically</em> each tool surfaces broken internal links. Specificity matters because a precise classification is actionable where a generic flag is not — ASO assigns a status bucket per broken link (<code>not_found_404</code> / <code>gone_410</code> / <code>forbidden_or_blocked</code> / <code>server_error_5xx</code> / <code>soft_404</code> / <code>redirect_chain_excessive</code>), whereas SemRush reports a single coarse "Broken" bucket (it shows the status code but applies no differentiated handling).</p>
+<table><tbody>
+<tr><th>Metric</th><th>ASO (prod)</th><th>SemRush</th></tr>
+<tr><td><strong>Overall score</strong></td><td><strong>86</strong></td><td><strong>67</strong></td></tr>
+<tr><td>Coverage (caught at all)</td><td>75% (9/12)</td><td>50% (6/12)</td></tr>
+<tr><td>Accuracy (0/1/2 rubric)</td><td>75% (18/24)</td><td>50% (12/24)</td></tr>
+<tr><td>Precision (low noise)</td><td>100% (9 flags, all correct; control clean)</td><td>100% (no false positives)</td></tr>
+</tbody></table>
+<p><strong>Headline:</strong> <strong>ASO wins the core (86 vs 67)</strong>. The two tie on the straightforward 4xx/5xx targets and the 302 redirect loop, but ASO <strong>uniquely catches the soft-404, the form-action link, the image-map area link, and the 301→404 broken redirect</strong> — each with the correct status bucket. The one core check SemRush wins is the <strong>internal nofollow link</strong> (#13), which ASO does not check today — an easy native gap to close (see Recommendations). SemRush is precise but has materially lower recall. Both miss the iframe embed (#10) and the single 302 temporary-redirect hop (#11) — both low-severity (see Notes). The category breakdown shows where each wins:</p>
+<table><tbody>
+<tr><th>Category</th><th>ASO</th><th>SemRush</th></tr>
+<tr><td>Target health — 404/410/403/5xx/soft-404 (#2,3,4,5,6)</td><td>10/10 (100%)</td><td>8/10 (80%)</td></tr>
+<tr><td>Redirect health — loop/temp/broken-redirect (#7,11,12)</td><td>4/6 (67%)</td><td>2/6 (33%)</td></tr>
+<tr><td>Link surface — form/area/iframe (#8,9,10)</td><td>4/6 (67%)</td><td>0/6 (0%)</td></tr>
+<tr><td>Link attribute — nofollow (#13)</td><td>0/2 (0%)</td><td>2/2 (100%)</td></tr>
+</tbody></table>
+<p><em>Complementary picture: <strong>ASO</strong> owns the non-anchor link surfaces (form / image-map area) and the redirect end-state, and is the only tool that diagnoses the <strong>soft-404</strong> (a 200 page whose body says "not found") and the <strong>broken redirect</strong> (301→404). <strong>SemRush</strong> matches ASO only on the plain 4xx/5xx targets and the redirect loop, reports them coarsely, and wins exactly one core check — the <strong>internal nofollow</strong> (#13) ASO does not yet have. The one shared broken gap worth a check is the <strong>iframe embed</strong>; the temporary-redirect hop is hygiene-only.</em></p>
+<h3>Per-scenario detail (Tier 1)</h3>
+<p><strong>Legend:</strong> ✅ detected · ❌ missed · ⚠️ partial. Score: 2 correct · 1 partial · 0 miss.</p>
+<table><tbody>
+<tr><th>#</th><th>Scenario (planted defect)</th><th>ASO (prod)</th><th>SemRush</th><th>ASO score</th><th>SemRush score</th></tr>
+<tr><td>1</td><td>clean-control (3 working links)</td><td>clean ✅</td><td>clean ✅</td><td>—</td><td>—</td></tr>
+<tr><td>2</td><td>anchor → 404</td><td><code>not_found_404</code> ✅</td><td>Internal Broken Links (404) ✅</td><td>2</td><td>2</td></tr>
+<tr><td>3</td><td>anchor → soft-404 (200 + not-found body)</td><td><code>soft_404</code> ✅</td><td><strong>not flagged ❌</strong> (target is 200)</td><td>2</td><td>0</td></tr>
+<tr><td>4</td><td>anchor → 410 Gone</td><td><code>gone_410</code> ✅</td><td>Broken (410) — coarse ✅</td><td>2</td><td>2</td></tr>
+<tr><td>5</td><td>anchor → 403 Forbidden</td><td><code>forbidden_or_blocked</code> ✅</td><td>Broken (403) — coarse ✅</td><td>2</td><td>2</td></tr>
+<tr><td>6</td><td>anchor → 503 server error</td><td><code>server_error_5xx</code> ✅</td><td>Broken (503) — coarse ✅</td><td>2</td><td>2</td></tr>
+<tr><td>7</td><td>anchor → 302 redirect loop</td><td><code>redirect_chain_excessive</code> ✅</td><td>Redirect Chains / Loops ✅</td><td>2</td><td>2</td></tr>
+<tr><td>8</td><td>form action → 404 (injected)</td><td><code>not_found_404</code> (<code>itemType=form</code>) ✅</td><td><strong>not flagged ❌</strong> (forms not crawled)</td><td>2</td><td>0</td></tr>
+<tr><td>9</td><td>image-map area href → 404 (injected)</td><td><code>not_found_404</code> (area link) ✅</td><td><strong>not flagged ❌</strong></td><td>2</td><td>0</td></tr>
+<tr><td>10</td><td>iframe src → 404 (injected)</td><td><strong>nothing ❌</strong> (treated as asset)</td><td><strong>not flagged ❌</strong></td><td>0</td><td>0</td></tr>
+<tr><td>11</td><td>anchor → 302 temporary redirect (→ 200)</td><td><strong>nothing ❌</strong> (no single-redirect check)</td><td><strong>Temporary Redirects report = 0 ❌</strong></td><td>0</td><td>0</td></tr>
+<tr><td>12</td><td>anchor → 301 → 404 (broken redirect)</td><td><code>not_found_404</code> (after following) ✅</td><td><strong>Broken Redirects report = 0 ❌</strong></td><td>2</td><td>0</td></tr>
+<tr><td>13</td><td>internal <code>rel="nofollow"</code> link (injected)</td><td><strong>nothing ❌</strong> (no check today)</td><td>Internal Nofollow Links ✅</td><td>0</td><td>2</td></tr>
+</tbody></table>
+<h3>Tier 2 — internal-linking structure (SemRush net-new)</h3>
+<p>SemRush also flags whole-site internal-linking <em>structure</em> issues that ASO does not check — they need the full internal link graph, so they sit outside the per-link broken-links opportunity. SemRush is also noisy here: it reported the Edge Delivery <code>/nav</code> and <code>/footer</code> fragments as orphaned and few-inlinks (false positives — they are includes, not content pages).</p>
+<table><tbody>
+<tr><th>#</th><th>Scenario</th><th>ASO (prod)</th><th>SemRush</th></tr>
+<tr><td>14</td><td>orphaned page (0 inbound, in sitemap)</td><td>N/A — no check in this opportunity</td><td>Orphaned Pages ✅</td></tr>
+<tr><td>15</td><td>page with exactly 1 inbound link</td><td>N/A — no check in this opportunity</td><td>Pages with Few Incoming Links ✅</td></tr>
+</tbody></table>
+<h2>Recommendations</h2>
+<p><strong>Guiding principle:</strong> a detection is only as valuable as it is <strong>fix-ready</strong> — specific and accurate enough to drive an auto-suggestion and an auto-fix. ASO's native checks are fix-ready by design (each broken link carries the status bucket, <code>itemType</code> and anchor text); SemRush's coarse "Broken" bucket is suggestion-grade until mapped to a fixable ASO defect type.</p>
+<table><tbody>
+<tr><th>Option</th><th>Pros</th><th>Cons</th><th>Assessment</th></tr>
+<tr><td><strong>1. ASO-only auto-detect</strong></td><td>Native checks are fix-ready and specific (correct status buckets); owns the non-anchor link surfaces, soft-404 and broken-redirect that SemRush misses; fully owned.</td><td>Misses the internal-nofollow check (#13) and has no structure checks (Tier 2); minor link-surface gaps (#10, #11).</td><td>Strong foundation — already wins the core 86→67.</td></tr>
+<tr><td><strong>2. SemRush-only auto-detect (feeding ASO)</strong></td><td>Adds internal-linking-structure breadth; built-in tracking.</td><td>Coarse bucketing, lower recall on the core (misses soft-404, form, area, broken-redirect), noisy (<code>/nav</code>, <code>/footer</code>); vendor dependency.</td><td>Not recommended — loses ASO's specificity and core recall.</td></tr>
+<tr><td><strong>3. Build SemRush's easy net-new natively in ASO</strong></td><td><strong>Internal nofollow</strong> (#13) is the one core-tier check SemRush wins today — an easy detect (the <code>rel</code> attribute) and easy fix (strip it); nofollow on your own internal links needlessly blocks internal link-equity flow. Pairs with the two small link-surface gaps (#10 iframe, #11 temp-redirect).</td><td>Small build; #10/#11 are low severity.</td><td><strong>Recommended now</strong> — cheap, owned, fix-ready; closes ASO's only core miss.</td></tr>
+<tr><td><strong>4. Structure auto-detect (orphaned / few-inlinks)</strong></td><td>Whole-site link-graph analysis — the genuinely net-new capability. ASO already has the crawl graph + sitemap to build it as its own internal-linking opportunity; SemRush can run in parallel as a coverage-net until native exists.</td><td>Larger build; arguably a separate opportunity from broken links.</td><td><strong>Recommended follow-on</strong> — scope as its own internal-linking opportunity.</td></tr>
+</tbody></table>
+<h3>Recommended path</h3>
+<p><strong>Option 3 now, Option 4 next.</strong> ASO already owns the broken-internal-links opportunity outright (86 vs 67) and is the only fix-ready detector. Take the easy native win first — add the <strong>internal-nofollow</strong> check (detect + strip) and, optionally, the two small link-surface gaps. Then scope <strong>structure auto-detect</strong> (orphaned / few-inlinks) as its own native internal-linking opportunity built from the crawl graph, with SemRush available as a parallel coverage-net while it is built. Options 1-alone (leaves Tier 2 uncovered) and 2 (can't feed the fix pipeline, lower core recall) are weaker for this goal.</p>
+<h3>Execution: ASO auto-detect gap-closure backlog</h3>
+<p>Fix locations in <code>spacecat-audit-worker/src/internal-links/</code> (<code>crawl-detection.js</code> link extraction; <code>helpers.js</code> <code>classifyStatusBucket</code>).</p>
+<table><tbody>
+<tr><th>Priority</th><th>Gap</th><th>Fix path</th><th>Effort</th><th>Ticket</th></tr>
+<tr><td>1</td><td>#13 internal nofollow (SemRush net-new, easy win)</td><td>flag internal <code>a[rel~=nofollow]</code> during link extraction; fix = strip the <code>nofollow</code> token</td><td><strong>S</strong></td><td>none — candidate to file</td></tr>
+<tr><td>2</td><td>#10 iframe embed → 404 (missed; treated as asset)</td><td><code>crawl-detection.js</code> — move <code>iframe[src]</code> from <code>extractAssetReferences</code> to <code>extractInternalLinks</code> (it is a navigable embed)</td><td><strong>S/M</strong></td><td>none — low severity</td></tr>
+<tr><td>3</td><td>#11 link to a single temporary (301/302) redirect</td><td><code>helpers.js</code> — add a non-error "link-to-redirect" classification distinct from <code>redirect_chain_excessive</code></td><td><strong>M</strong></td><td>none — low severity</td></tr>
+<tr><td>4</td><td>#14/#15 structure (orphaned / few-inlinks) — SemRush net-new</td><td>new internal-linking opportunity from the site link graph + sitemap (ASO already has the crawl graph)</td><td><strong>L</strong></td><td>none — scope as its own opportunity</td></tr>
+</tbody></table>
+<h3>Strategic notes</h3>
+<ul>
+<li><strong>Detection granularity:</strong> ASO assigns a specific status bucket per broken link; SemRush reports a single coarse "Broken" bucket (it shows the code but applies no differentiated handling), so an imported finding must be re-derived before it can drive a fix.</li>
+<li><strong>SemRush is precise but noisy out of band:</strong> zero broken-link false positives, yet it flagged the Edge Delivery <code>/nav</code> and <code>/footer</code> includes as orphaned / few-inlinks — structural noise a native ASO check would avoid.</li>
+<li><strong>Migration:</strong> the broken-internal-links audit is being unified across ASO + Preflight under <a class="external-link" href="https://jira.corp.adobe.com/browse/SITES-45047">SITES-45047</a> (migration profile, SDL ADR Branch A); the Preflight↔audit output contract is <a class="external-link" href="https://jira.corp.adobe.com/browse/SITES-43640">SITES-43640</a>. The net-new Mystique Preflight checks (<code>missing-href</code>, <code>insecure-link</code>) were excluded from ASO's score above.</li>
+</ul>
+<h3>Notes</h3>
+<ul>
+<li><strong>JS-injected surfaces were detected:</strong> the form-action (#8) and image-map area (#9) links exist only in the rendered DOM (the CMS pipeline strips raw <code>form</code>/<code>area</code> tags), and ASO flagged both — confirming it scrapes the rendered DOM. SemRush (JS-rendering ON) still did not surface them.</li>
+<li><strong>Soft-404 (#3)</strong> = a target returning HTTP 200 whose body says the content no longer exists. ASO's <code>soft_404</code> check caught it; SemRush, which keys off the status code, cannot.</li>
+<li><strong>#10 iframe → 404 — what it costs:</strong> the embedded content fails to load, so the user sees a blank or error frame where a widget/map/video should be, and the embed adds a dead request. It is a broken embedded <em>resource</em> rather than a click-through link, so severity is lower than a broken navigational link — which is why it sits below the nofollow win.</li>
+<li><strong>#11 temporary redirect (302 → 200) — what it costs:</strong> the link still works for the user, so there is no broken experience. The issue is SEO hygiene: a 302 signals "temporary," so search engines may not consolidate ranking signals onto the destination, and every hop adds latency and crawl cost. Best practice is to link directly to the final URL (or use 301 if the move is permanent). Low severity.</li>
+<li><strong>Image-map area (#9):</strong> ASO flagged the injected <code>&lt;area href&gt;</code> pointing at a 404 (the navigational defect); SemRush did not surface it.</li>
+</ul>
+<p><em>Method &amp; raw artifacts: scenarios in the <code>eds-test</code> repo (<code>test-canonical/opportunities/broken-internal-links/</code>); ASO opportunity export (9 suggestions) and the SemRush report CSVs retained locally. ASO compared = production <code>src/internal-links</code> checks only.</em></p>
+<p><br /></p><hr /><p><br /></p>

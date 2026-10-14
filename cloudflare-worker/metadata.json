@@ -1,0 +1,8 @@
+{
+  "main_module": "worker.mjs",
+  "compatibility_date": "2024-11-01",
+  "bindings": [
+    { "name": "ORIGIN_HOSTNAME", "type": "plain_text", "text": "main--eds-test--qyacoub.aem.live" },
+    { "name": "PUSH_INVALIDATION", "type": "plain_text", "text": "disabled" }
+  ]
+}

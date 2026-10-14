@@ -1,0 +1,25 @@
+{
+  "opportunity": "broken-internal-links",
+  "wiki_page_id": "3942892395",
+  "tools": ["ASO", "SemRush"],
+  "_note": "Tier 1 (core broken-internal-links) only. Tier 2 (nofollow/orphaned/few-inlinks) reported separately as SemRush net-new. Tier 3 (image/css-js/canonical/hreflang) out of opportunity for both.",
+  "scenarios": [
+    {"n": 1,  "slug": "bil-clean-control",       "control": true, "scores": {"ASO": null, "SemRush": null}, "category": "control"},
+    {"n": 2,  "slug": "bil-anchor-404",          "scores": {"ASO": 2, "SemRush": 2}, "category": "Target health (4xx/5xx/soft)"},
+    {"n": 3,  "slug": "bil-soft-404",            "scores": {"ASO": 2, "SemRush": 0}, "category": "Target health (4xx/5xx/soft)"},
+    {"n": 4,  "slug": "bil-gone-410",            "scores": {"ASO": 2, "SemRush": 2}, "category": "Target health (4xx/5xx/soft)"},
+    {"n": 5,  "slug": "bil-forbidden-403",       "scores": {"ASO": 2, "SemRush": 2}, "category": "Target health (4xx/5xx/soft)"},
+    {"n": 6,  "slug": "bil-server-5xx",          "scores": {"ASO": 2, "SemRush": 2}, "category": "Target health (4xx/5xx/soft)"},
+    {"n": 7,  "slug": "bil-redirect-chain",      "scores": {"ASO": 2, "SemRush": 2}, "category": "Redirect health"},
+    {"n": 8,  "slug": "bil-form-action-404",     "scores": {"ASO": 2, "SemRush": 0}, "category": "Link surface (non-anchor)"},
+    {"n": 9,  "slug": "bil-imagemap-area-404",   "scores": {"ASO": 2, "SemRush": 0}, "category": "Link surface (non-anchor)"},
+    {"n": 10, "slug": "bil-iframe-404",          "scores": {"ASO": 0, "SemRush": 0}, "category": "Link surface (non-anchor)"},
+    {"n": 11, "slug": "bil-temp-redirect-302",   "scores": {"ASO": 0, "SemRush": 0}, "category": "Redirect health"},
+    {"n": 12, "slug": "bil-broken-redirect",     "scores": {"ASO": 2, "SemRush": 0}, "category": "Redirect health"},
+    {"n": 13, "slug": "bil-nofollow-internal",   "scores": {"ASO": 0, "SemRush": 2}, "category": "Link attribute (nofollow)"}
+  ],
+  "flags": {
+    "ASO":     {"total": 9, "noise": 0, "note": "9 suggestions, all correct primary; no false positives on control"},
+    "SemRush": {"total": 7, "noise": 0, "note": "broken-links (4) + redirect-chains (2) + nofollow (1); no false positives (orphaned/few-inlinks footer/nav noise is in the Tier-2 reports)"}
+  }
+}
