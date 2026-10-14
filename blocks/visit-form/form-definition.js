@@ -3,7 +3,7 @@
  * Opted in to WebMCP with properties['fd:webMcpEnabled'], exactly like an authored AEM form.
  * Submissions POST (multipart, af-core default) to `action`, handled by the Cloudflare Worker.
  */
-export const SUBMIT_ENDPOINT = '/api/webmcp-form/submit';
+export const SUBMIT_ENDPOINT = '/api/visit-request/submit';
 
 export default {
   id: 'montreal-visit-request',

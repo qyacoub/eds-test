@@ -1,34 +1,34 @@
-.webmcp-form .wf-form {
+.visit-form .wf-form {
   max-width: 720px;
   margin: 0 auto;
   font-size: var(--body-font-size-xs);
 }
 
-.webmcp-form .wf-intro {
+.visit-form .wf-intro {
   margin-top: 0;
 }
 
-.webmcp-form .wf-field,
-.webmcp-form fieldset {
+.visit-form .wf-field,
+.visit-form fieldset {
   margin: 0 0 20px;
 }
 
-.webmcp-form fieldset {
+.visit-form fieldset {
   border: 1px solid var(--light-color);
   border-radius: 8px;
   padding: 12px 16px;
 }
 
-.webmcp-form legend,
-.webmcp-form .wf-field > label {
+.visit-form legend,
+.visit-form .wf-field > label {
   display: block;
   font-weight: 600;
   margin-bottom: 6px;
 }
 
-.webmcp-form input:not([type="checkbox"]),
-.webmcp-form select,
-.webmcp-form textarea {
+.visit-form input:not([type="checkbox"]),
+.visit-form select,
+.visit-form textarea {
   box-sizing: border-box;
   width: 100%;
   padding: 10px 12px;
@@ -39,72 +39,72 @@
   font: inherit;
 }
 
-.webmcp-form input[readonly] {
+.visit-form input[readonly] {
   background: var(--light-color);
 }
 
-.webmcp-form input:focus-visible,
-.webmcp-form select:focus-visible,
-.webmcp-form textarea:focus-visible {
+.visit-form input:focus-visible,
+.visit-form select:focus-visible,
+.visit-form textarea:focus-visible {
   outline: 3px solid var(--secondary-color);
   outline-offset: 1px;
 }
 
-.webmcp-form [aria-invalid="true"] {
+.visit-form [aria-invalid="true"] {
   border-color: var(--accent-hover-color);
 }
 
-.webmcp-form .wf-checkbox,
-.webmcp-form .wf-option {
+.visit-form .wf-checkbox,
+.visit-form .wf-option {
   display: flex;
   gap: 10px;
   align-items: center;
 }
 
-.webmcp-form .wf-options {
+.visit-form .wf-options {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 8px;
 }
 
-.webmcp-form input[type="checkbox"] {
+.visit-form input[type="checkbox"] {
   width: 20px;
   height: 20px;
 }
 
-.webmcp-form .wf-help {
+.visit-form .wf-help {
   margin: 4px 0 0;
   color: #5b6475;
   font-size: 0.9em;
 }
 
-.webmcp-form .wf-error {
+.visit-form .wf-error {
   margin: 4px 0 0;
   min-height: 0;
   color: var(--accent-hover-color);
   font-weight: 600;
 }
 
-.webmcp-form .wf-error:empty {
+.visit-form .wf-error:empty {
   display: none;
 }
 
-.webmcp-form .wf-instance {
+.visit-form .wf-instance {
   border-top: 1px dashed #d8d1c6;
   padding-top: 8px;
   margin-bottom: 12px;
 }
 
-.webmcp-form .wf-instance-title {
+.visit-form .wf-instance-title {
   margin: 0 0 8px;
   font-weight: 600;
 }
 
-.webmcp-form .wf-status {
+.visit-form .wf-status {
   margin-top: 16px;
   font-weight: 600;
 }
 
-.webmcp-form .wf-status.wf-success {
+.visit-form .wf-status.wf-success {
   color: var(--secondary-color);
 }

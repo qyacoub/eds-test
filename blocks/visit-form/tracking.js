@@ -73,7 +73,7 @@ function matomoEvent(action, name, value) {
 // (a script calling execute() directly) are also flagged. These are hints, not proof: a script that
 // captured executeTool before this block loaded, or a host using an extension's isolated world,
 // is reported as browser-integration.
-const OWN_FILES = /\/blocks\/webmcp-form\/|af-webmcp\.bundle/;
+const OWN_FILES = /\/blocks\/visit-form\/|af-webmcp\.bundle/;
 const SCRIPT_CALL_WINDOW_MS = 5000;
 const scriptCalls = [];
 

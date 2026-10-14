@@ -1,5 +1,5 @@
 /*
- * webmcp-form block: renders an Adaptive Form with the official af-core runtime and exposes it to
+ * visit-form block: renders an Adaptive Form with the official af-core runtime and exposes it to
  * in-browser AI agents through the official af-webmcp adapter (@aemforms/* 1.0.9, vendored).
  * The DOM and the WebMCP tools drive the same model, so agents can use either path.
  */
@@ -304,5 +304,5 @@ export default async function decorate(block) {
     });
     window.addEventListener('pagehide', (event) => { if (!event.persisted) unregister(); });
   }
-  block.dataset.webmcp = host ? 'registered' : 'no-host';
+  block.dataset.host = host ? 'registered' : 'no-host';
 }
