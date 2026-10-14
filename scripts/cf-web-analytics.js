@@ -6,7 +6,7 @@
  * Cloudflare Web Analytics has no custom events: WebMCP tool calls are logged by the
  * /__webmcp beacon (D1 / Google Sheet) instead.
  */
-const CF_BEACON_TOKEN = '<token from Cloudflare → Web Analytics → Manage site → JS snippet>';
+const CF_BEACON_TOKEN = 'd9b47507395d4f5996119a82c1c60e5e'; // public site token (Web Analytics)
 
 if (!CF_BEACON_TOKEN.startsWith('<')) {
   const script = document.createElement('script');
