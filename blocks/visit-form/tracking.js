@@ -73,7 +73,8 @@ function matomoEvent(action, name, value) {
 // (a script calling execute() directly) are also flagged. These are hints, not proof: a script that
 // captured executeTool before this block loaded, or a host using an extension's isolated world,
 // is reported as browser-integration.
-const OWN_FILES = /\/blocks\/visit-form\/|af-webmcp\.bundle/;
+// Our tracking code and the official af-webmcp code (round 1 bundle, round 2 forms block).
+const OWN_FILES = /\/blocks\/visit-form\/|af-webmcp\.bundle|\/blocks\/form\/|\/scripts\/form-agent-tracking/;
 const SCRIPT_CALL_WINDOW_MS = 5000;
 const scriptCalls = [];
 
@@ -119,7 +120,7 @@ function callOrigin(toolName) {
 let pendingSubmitVia = null;
 export function markSubmitVia(via) { pendingSubmitVia = via; }
 
-function tagSubmitRequests(submitPath) {
+function tagSubmitRequests(submitPath, { defaultSubmitVia = 'unknown', reportFromFetch = false } = {}) {
   if (window.fetch.webmcpTagged) return;
   const originalFetch = window.fetch.bind(window);
   const tagged = (input, init = {}) => {
@@ -127,9 +128,21 @@ function tagSubmitRequests(submitPath) {
     if (url.origin === window.location.origin && url.pathname === submitPath) {
       const headers = new Headers(init.headers || (typeof input === 'string' ? undefined : input.headers));
       headers.set('x-webmcp-session', SESSION_ID);
-      headers.set('x-submit-via', pendingSubmitVia || 'unknown');
+      const via = pendingSubmitVia || defaultSubmitVia;
+      headers.set('x-submit-via', via);
       pendingSubmitVia = null;
-      return originalFetch(input, { ...init, headers });
+      const request = originalFetch(input, { ...init, headers });
+      // Round 2: the official forms block owns submission, so report it from the response.
+      if (reportFromFetch) {
+        request.then((res) => res.clone().json().catch(() => ({})).then((body) => {
+          // eslint-disable-next-line no-use-before-define
+          reportSubmitOutcome({ via, success: res.ok, reference: body?.reference });
+        })).catch(() => {
+          // eslint-disable-next-line no-use-before-define
+          reportSubmitOutcome({ via, success: false, error: 'network' });
+        });
+      }
+      return request;
     }
     return originalFetch(input, init);
   };
@@ -186,9 +199,11 @@ export function nativeModelContext() {
   return document.modelContext || navigator.modelContext || null;
 }
 
-export function initTracking({ submitPath, formId }) {
+export function initTracking({
+  submitPath, formId, defaultSubmitVia, reportFromFetch,
+}) {
   wrapScriptEntryPoints();
-  tagSubmitRequests(submitPath);
+  tagSubmitRequests(submitPath, { defaultSubmitVia, reportFromFetch });
   const host = nativeModelContext();
   sendBeacon('page_load', { formId, webmcpHost: host ? 'native' : 'none' });
   matomoEvent('page_load', host ? 'native-host' : 'no-host');
