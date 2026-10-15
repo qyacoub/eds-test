@@ -8,7 +8,7 @@ import {
   initTracking, trackingModelContext, nativeModelContext,
 } from '../blocks/visit-form/tracking.js';
 
-const PAGES = ['/montreal-visit-request-2'];
+const PAGES = ['/plan-your-montreal-trip'];
 
 if (PAGES.includes(window.location.pathname.replace(/\/$/, ''))) {
   const host = nativeModelContext();
@@ -26,7 +26,7 @@ if (PAGES.includes(window.location.pathname.replace(/\/$/, ''))) {
   }
   initTracking({
     submitPath: '/api/visit-request/submit',
-    formId: 'montreal-visit-request-2',
+    formId: 'montreal-trip-request',
     defaultSubmitVia: 'dom',
     reportFromFetch: true,
   });
