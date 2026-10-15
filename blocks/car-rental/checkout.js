@@ -20,11 +20,12 @@ const input = (id, attrs = {}) => el('input', {
 });
 const select = (id, options, value = '') => el('select', { id, name: id }, options.map(([v, label]) => el('option', { value: v, text: label, selected: v === value })));
 
-const DRIVER_FIELDS = ['title', 'firstName', 'lastName', 'age', 'phone', 'email'];
-const BILLING_FIELDS = ['address1', 'city', 'province', 'postalCode', 'country'];
-const PAYMENT_FIELDS = ['cardName', 'cardNumber', 'cardExpiry', 'cardCvc'];
+export const DRIVER_FIELDS = ['title', 'firstName', 'lastName', 'age', 'phone', 'email'];
+export const BILLING_FIELDS = ['address1', 'city', 'province', 'postalCode', 'country'];
+export const PAYMENT_FIELDS = ['cardName', 'cardNumber', 'cardExpiry', 'cardCvc'];
+export { PROVINCES };
 
-const RULES = {
+export const RULES = {
   title: (v) => (v ? '' : 'Select a title.'),
   firstName: (v) => (v.trim() ? '' : 'Enter the driver’s first name.'),
   lastName: (v) => (v.trim() ? '' : 'Enter the driver’s last name.'),
@@ -236,8 +237,14 @@ export default function renderCheckout(container, { base, params }) {
         paymentFilled: PAYMENT_FIELDS.some((id) => form.elements[id].value.trim()),
       },
     });
+    const report = (detail) => container.dispatchEvent(new CustomEvent('cr-checkout-result', { detail }));
     if (invalid.length) {
       form.querySelector(`#${invalid[0]}`)?.focus();
+      report({
+        status: 'invalid',
+        errors: Object.fromEntries(invalid
+          .map((id) => [id, RULES[id](form.elements[id].value, form)])),
+      });
       return;
     }
 
@@ -255,6 +262,7 @@ export default function renderCheckout(container, { base, params }) {
       beacon('car_payment_declined', { success: false, args: { offer: params.offer } });
       setError(form, 'cardNumber', 'Your card was declined. Check the details or use another card.');
       form.elements.cardNumber.focus();
+      report({ status: 'declined', errors: { cardNumber: 'Your card was declined. Check the details or use another card.' } });
       return;
     }
 
@@ -289,5 +297,6 @@ export default function renderCheckout(container, { base, params }) {
     renderConfirmation(container, {
       booking, params, rate, extras, form, reference,
     });
+    report({ status: 'confirmed', reference });
   });
 }

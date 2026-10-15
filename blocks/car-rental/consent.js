@@ -15,14 +15,21 @@ function stored() {
   try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { return null; }
 }
 
+export const consentChoices = () => stored();
+
+/** Stores the choice, logs it and closes the banner. Used by the banner buttons and agent tools. */
+export function saveConsent(choices, via) {
+  const record = { ...choices, necessary: true, savedAt: new Date().toISOString() };
+  try { localStorage.setItem(KEY, JSON.stringify(record)); } catch { /* private mode */ }
+  beacon('car_consent', { success: true, via, args: record });
+  document.querySelector('.cr-consent')?.remove();
+  return record;
+}
+
 export default function showConsent() {
   if (stored() || document.querySelector('.cr-consent')) return;
 
-  const save = (choices, via) => {
-    const record = { ...choices, necessary: true, savedAt: new Date().toISOString() };
-    try { localStorage.setItem(KEY, JSON.stringify(record)); } catch { /* private mode */ }
-    beacon('car_consent', { success: true, via, args: record });
-  };
+  const save = saveConsent;
 
   const settings = el(
     'div',

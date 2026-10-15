@@ -19,6 +19,9 @@ const LOADERS = {
   checkout: () => import('./checkout.js'),
 };
 
+// Flows that also expose agent tools. Same pages and text; only the tools differ.
+const TOOL_FLOWS = /^(\/drafts)?\/car-hire$/;
+
 export default async function decorate(block) {
   const config = readBlockConfig(block);
   const step = STEPS.includes(config.step) ? config.step : 'search';
@@ -37,8 +40,18 @@ export default async function decorate(block) {
   block.append(body);
 
   const module = await LOADERS[step]();
+  let rendering;
   if (step === 'search') body.append(module.default({ base, params }));
-  else await module.default(body, { base, params });
+  else rendering = module.default(body, { base, params });
 
+  if (TOOL_FLOWS.test(base)) {
+    import('./tools.js')
+      .then((tools) => tools.default({
+        step, base, params, container: body,
+      }))
+      .catch(() => {});
+  }
+
+  await rendering;
   showConsent();
 }

@@ -74,7 +74,7 @@ function matomoEvent(action, name, value) {
 // captured executeTool before this block loaded, or a host using an extension's isolated world,
 // is reported as browser-integration.
 // Our tracking code and the official af-webmcp code (round 1 bundle, round 2 forms block).
-const OWN_FILES = /\/blocks\/visit-form\/|af-webmcp\.bundle|\/blocks\/form\/|\/scripts\/form-agent-tracking/;
+const OWN_FILES = /\/blocks\/visit-form\/|\/blocks\/car-rental\/|af-webmcp\.bundle|\/blocks\/form\/|\/scripts\/form-agent-tracking/;
 const SCRIPT_CALL_WINDOW_MS = 5000;
 const scriptCalls = [];
 
@@ -91,7 +91,7 @@ function wrapExecuteTool(target, route, nameOf) {
   } catch { /* non-configurable in some builds */ }
 }
 
-function wrapScriptEntryPoints() {
+export function wrapScriptEntryPoints() {
   const toolName = (tool) => (typeof tool === 'string' ? tool : tool?.name);
   [document.modelContext, navigator.modelContext].filter(Boolean).forEach((context) => {
     wrapExecuteTool(Object.getPrototypeOf(context), 'executeTool', toolName);
@@ -100,7 +100,7 @@ function wrapScriptEntryPoints() {
   wrapExecuteTool(navigator.modelContextTesting, 'modelContextTesting', toolName);
 }
 
-function callOrigin(toolName) {
+export function callOrigin(toolName) {
   const now = performance.now();
   while (scriptCalls.length && now - scriptCalls[0].at > SCRIPT_CALL_WINDOW_MS) scriptCalls.shift();
   const index = scriptCalls.findIndex((c) => c.name === toolName);
