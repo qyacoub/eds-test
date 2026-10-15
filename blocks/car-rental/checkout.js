@@ -1,13 +1,17 @@
 /*
  * Checkout: driver details, billing address, payment fields and a confirm button.
- * Demo only: nothing is charged and card data never leaves the page.
+ * Test payments only: just the published test card is accepted (any other card is declined),
+ * nothing is charged, and card data never leaves the page (only the last 4 digits are logged).
  */
 import {
-  el, field, setError, stepUrl, pick, SEARCH_KEYS, beacon,
+  el, field, setError, stepUrl, pick, SEARCH_KEYS, beacon, spinner, wait, formatDate, formatTime,
 } from './util.js';
 import { summaryBar } from './results.js';
 import { resolveBooking, summaryPanel, parseExtras } from './summary.js';
 import { missingBooking } from './extras.js';
+import { priceBreakdown, RATES, EXTRAS } from './data.js';
+
+const TEST_CARD = '4242424242424242';
 
 const PROVINCES = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
 
@@ -39,19 +43,54 @@ const RULES = {
   terms: (v, form) => (form.elements.terms.checked ? '' : 'Accept the rental conditions to continue.'),
 };
 
-function demoDialog() {
-  const dialog = el(
-    'dialog',
-    { class: 'cr-dialog', 'aria-labelledby': 'cr-demo-title' },
-    el('h2', { id: 'cr-demo-title', text: 'Demo site: nothing was booked' }),
-    el('p', { text: 'This car rental flow is a test environment. No reservation was created and no payment was taken. Card details are never stored or sent.' }),
-    el('div', { class: 'cr-dialog-actions' }, el('button', {
-      type: 'button', class: 'button primary', text: 'Close', onclick: () => dialog.close(),
-    })),
-  );
-  dialog.addEventListener('close', () => dialog.remove());
-  document.body.append(dialog);
-  dialog.showModal();
+const bookingReference = () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const random = crypto.getRandomValues(new Uint32Array(6));
+  return `VM-${[...random].map((n) => chars[n % chars.length]).join('')}`;
+};
+
+function renderConfirmation(container, {
+  booking, params, rate, extras, form, reference,
+}) {
+  const { offer, pickup, dropoff } = booking;
+  const v = (id) => form.elements[id].value.trim();
+  const extrasText = EXTRAS.filter((e) => extras[e.id])
+    .map((e) => (extras[e.id] > 1 ? `${e.name} × ${extras[e.id]}` : e.name)).join(', ') || 'None';
+  const block = container.closest('.car-rental');
+  block?.querySelectorAll('.cr-stepper li').forEach((li) => {
+    li.className = 'done';
+    li.removeAttribute('aria-current');
+  });
+  const heading = el('h2', { tabindex: '-1', text: 'Your car is booked' });
+  const row = (label, value) => [el('dt', { text: label }), el('dd', { text: value })];
+  container.replaceChildren(el(
+    'div',
+    { class: 'cr-two-col' },
+    el(
+      'section',
+      { class: 'cr-confirmation', 'aria-labelledby': 'cr-confirmation-title' },
+      el('p', { class: 'cr-confirmation-badge', text: 'Payment accepted' }),
+      Object.assign(heading, { id: 'cr-confirmation-title' }),
+      el('p', { class: 'cr-confirmation-ref' }, 'Booking reference ', el('strong', { text: reference })),
+      el('p', { text: `We sent the rental voucher to ${v('email')}. Show it with the driver’s licence and credit card at the ${offer.supplier.name} counter.` }),
+      el(
+        'dl',
+        { class: 'cr-confirmation-details' },
+        ...row('Car', `${offer.category.name} (${offer.category.similar})`),
+        ...row('Supplier', offer.supplier.name),
+        ...row('Pick-up', `${pickup.label}, ${formatDate(params.pickupDate)} · ${formatTime(params.pickupTime)}`),
+        ...row('Drop-off', `${dropoff.label}, ${formatDate(params.dropoffDate)} · ${formatTime(params.dropoffTime)}`),
+        ...row('Rate', (RATES.find((r) => r.id === rate) || RATES[0]).name),
+        ...row('Extras', extrasText),
+        ...row('Main driver', `${v('title')} ${v('firstName')} ${v('lastName')}, age ${v('age')}`),
+        ...row('Paid by card ending', TEST_CARD.slice(-4)),
+      ),
+      el('p', { class: 'cr-hint', text: 'Test booking on a demo site: no reservation was made with the supplier and no money was taken.' }),
+    ),
+    summaryPanel(booking, params, { rate, extras }),
+  ));
+  window.scrollTo({ top: 0 });
+  heading.focus();
 }
 
 export default function renderCheckout(container, { base, params }) {
@@ -181,8 +220,10 @@ export default function renderCheckout(container, { base, params }) {
     observer.observe(payment);
   }
 
-  form.addEventListener('submit', (event) => {
+  let submitting = false;
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    if (submitting) return;
     const invalid = validate([...DRIVER_FIELDS, ...BILLING_FIELDS, ...PAYMENT_FIELDS, 'terms']);
     beacon('car_confirm_attempt', {
       success: invalid.length === 0,
@@ -199,6 +240,54 @@ export default function renderCheckout(container, { base, params }) {
       form.querySelector(`#${invalid[0]}`)?.focus();
       return;
     }
-    demoDialog();
+
+    submitting = true;
+    const button = form.querySelector('.cr-confirm');
+    button.disabled = true;
+    const processing = spinner('Processing your payment…');
+    button.after(processing);
+    await wait(1800);
+    processing.remove();
+    button.disabled = false;
+    submitting = false;
+
+    if (form.elements.cardNumber.value.replace(/\D/g, '') !== TEST_CARD) {
+      beacon('car_payment_declined', { success: false, args: { offer: params.offer } });
+      setError(form, 'cardNumber', 'Your card was declined. Check the details or use another card.');
+      form.elements.cardNumber.focus();
+      return;
+    }
+
+    const reference = bookingReference();
+    const { offer, pickup, dropoff } = booking;
+    const breakdown = priceBreakdown(offer, rate, extras);
+    const v = (id) => form.elements[id].value.trim();
+    beacon('car_booking_confirmed', {
+      success: true,
+      args: {
+        reference,
+        offer: offer.id,
+        car: offer.category.name,
+        supplier: offer.supplier.name,
+        pickup: pickup.id,
+        dropoff: dropoff.id,
+        pickupAt: `${params.pickupDate}T${params.pickupTime}`,
+        dropoffAt: `${params.dropoffDate}T${params.dropoffTime}`,
+        rate,
+        extras: params.extras || '',
+        totalDueToday: breakdown.total,
+        payAtCounter: breakdown.payAtCounter,
+        driver: `${v('title')} ${v('firstName')} ${v('lastName')}`,
+        age: v('age'),
+        phone: v('phone'),
+        email: v('email'),
+        address: [v('address1'), v('address2'), v('city'), v('province'), v('postalCode'), v('country')].filter(Boolean).join(', '),
+        saveProfile: form.elements.saveProfile.checked,
+        cardLast4: TEST_CARD.slice(-4),
+      },
+    });
+    renderConfirmation(container, {
+      booking, params, rate, extras, form, reference,
+    });
   });
 }

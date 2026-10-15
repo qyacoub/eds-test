@@ -826,6 +826,44 @@ main .car-rental .cr-checkout-form {
   gap: 24px;
 }
 
+main .car-rental .cr-confirmation {
+  padding: 24px;
+  border: 1px solid #c9e4d2;
+  border-radius: 12px;
+  background: #f3faf5;
+}
+
+main .car-rental .cr-confirmation-badge {
+  display: inline-block;
+  margin: 0 0 8px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #1f7a3f;
+  color: #fff;
+  font-size: var(--body-font-size-xs);
+  font-weight: 600;
+}
+
+main .car-rental .cr-confirmation-ref strong {
+  font-size: 1.25em;
+  letter-spacing: 0.05em;
+}
+
+main .car-rental .cr-confirmation-details {
+  display: grid;
+  grid-template-columns: minmax(110px, max-content) 1fr;
+  gap: 6px 16px;
+  margin: 16px 0;
+}
+
+main .car-rental .cr-confirmation-details dt {
+  font-weight: 600;
+}
+
+main .car-rental .cr-confirmation-details dd {
+  margin: 0;
+}
+
 main .car-rental .cr-chosen-car {
   display: grid;
   gap: 12px;
