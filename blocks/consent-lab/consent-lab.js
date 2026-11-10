@@ -86,7 +86,7 @@ function buildBanner(variant) {
   const banner = el(
     variant === 'modal' ? 'div' : 'section',
     {
-      class: `cl-banner cl-${variant}`,
+      class: `cl-banner cl-v-${variant}`,
       role: variant === 'modal' ? 'dialog' : undefined,
       'aria-modal': variant === 'modal' ? 'true' : undefined,
       'aria-labelledby': 'cl-title',
