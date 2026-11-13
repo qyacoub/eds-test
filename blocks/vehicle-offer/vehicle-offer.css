@@ -1,0 +1,10 @@
+.vehicle-offer {
+  margin: 16px 0;
+  padding: 16px 20px;
+  border: 1px solid #d8d2c8;
+  border-radius: 8px;
+}
+
+.vehicle-offer p {
+  margin: 4px 0;
+}
