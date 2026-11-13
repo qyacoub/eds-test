@@ -1,4 +1,4 @@
-/* consent-lab: body-level banner variants (cl-v-equal, cl-v-accept, cl-v-modal, cl-v-bar) */
+/* consent-lab: body-level banner variants (cl-v-equal, cl-v-accept, cl-v-modal, cl-v-bar, cl-v-choices) */
 .cl-banner [hidden] {
   display: none !important;
 }
@@ -58,10 +58,16 @@
   background: rgb(15 23 32 / 72%);
 }
 
-.cl-v-modal {
+.cl-v-modal,
+.cl-v-choices {
   max-width: 520px;
   border-radius: 12px;
   box-shadow: 0 12px 40px rgb(0 0 0 / 30%);
+}
+
+.cl-v-choices {
+  max-height: calc(100vh - 40px);
+  overflow: auto;
 }
 
 body.cl-locked {
