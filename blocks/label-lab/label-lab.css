@@ -1,0 +1,99 @@
+.label-lab {
+  max-width: 760px;
+  margin: 24px 0;
+}
+
+.label-lab .ll-counters {
+  display: flex;
+  justify-content: flex-end;
+  gap: 24px;
+  margin-bottom: 12px;
+  font-size: var(--body-font-size-s);
+}
+
+.label-lab .ll-counters p {
+  margin: 0;
+}
+
+.label-lab .ll-count {
+  font-weight: 700;
+}
+
+.label-lab .ll-card {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 32px;
+  align-items: center;
+  padding: 24px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+}
+
+.label-lab .ll-media svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.label-lab .ll-info p {
+  margin: 0 0 8px;
+}
+
+.label-lab .ll-name {
+  font-size: var(--heading-font-size-s);
+  font-weight: 700;
+}
+
+.label-lab .ll-price {
+  font-size: var(--heading-font-size-m);
+  font-weight: 700;
+  color: #b30000;
+}
+
+.label-lab .ll-meta {
+  color: #555;
+}
+
+.label-lab .ll-actions {
+  display: flex;
+  gap: 12px;
+  margin: 16px 0 8px;
+}
+
+.label-lab .ll-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  margin: 0;
+  padding: 0;
+  border: 2px solid #222;
+  border-radius: 50%;
+  background: #fff;
+  color: #222;
+  cursor: pointer;
+}
+
+.label-lab .ll-icon:hover,
+.label-lab .ll-icon:focus-visible {
+  background: #222;
+  color: #fff;
+}
+
+.label-lab .ll-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.label-lab .ll-status {
+  min-height: 1.5em;
+  font-size: var(--body-font-size-s);
+  color: #1b6e35;
+}
+
+@media (width <= 600px) {
+  .label-lab .ll-card {
+    grid-template-columns: 1fr;
+  }
+}
