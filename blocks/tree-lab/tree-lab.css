@@ -1,0 +1,173 @@
+.tree-lab {
+  max-width: 760px;
+  margin: 24px 0;
+}
+
+.tree-lab .tl-counters {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+  font-size: var(--body-font-size-s);
+}
+
+.tree-lab .tl-counters p {
+  margin: 0;
+}
+
+.tree-lab .tl-count {
+  font-weight: 700;
+}
+
+.tree-lab .tl-card {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 32px;
+  align-items: center;
+  padding: 24px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+}
+
+.tree-lab .tl-media svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.tree-lab .tl-body {
+  fill: var(--tl-body, #c4c8ce);
+}
+
+.tree-lab .tl-shade {
+  opacity: 0.85;
+}
+
+.tree-lab .tl-info p {
+  margin: 0 0 8px;
+}
+
+.tree-lab .tl-name {
+  font-size: var(--heading-font-size-s);
+  font-weight: 700;
+}
+
+.tree-lab .tl-price {
+  font-size: var(--heading-font-size-m);
+  font-weight: 700;
+  color: #b30000;
+}
+
+.tree-lab .tl-meta {
+  color: #555;
+}
+
+.tree-lab .tl-info .tl-label {
+  margin: 16px 0 6px;
+  font-size: var(--body-font-size-s);
+  font-weight: 700;
+}
+
+/* Same box for the button (tree) and the div (no tree) versions of every control. */
+.tree-lab .tl-swatch,
+.tree-lab .tl-step,
+.tree-lab .tl-add {
+  box-sizing: border-box;
+  appearance: none;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  line-height: 1;
+  color: inherit;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tree-lab .tl-swatches {
+  display: flex;
+  gap: 14px;
+}
+
+.tree-lab .tl-swatch {
+  display: block;
+  width: 34px;
+  height: 34px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px #999;
+}
+
+.tree-lab .tl-swatch.tl-selected {
+  box-shadow: 0 0 0 3px #222;
+}
+
+.tree-lab .tl-swatch-silver {
+  background: #c4c8ce;
+}
+
+.tree-lab .tl-swatch-black {
+  background: #262626;
+}
+
+.tree-lab .tl-swatch-red {
+  background: #b3121f;
+}
+
+.tree-lab .tl-stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 2px solid #222;
+  border-radius: 8px;
+}
+
+.tree-lab .tl-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  font-size: 22px;
+}
+
+.tree-lab .tl-step:hover {
+  background: #eee;
+}
+
+.tree-lab .tl-qty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  font-weight: 700;
+}
+
+.tree-lab .tl-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 220px;
+  height: 48px;
+  margin: 20px 0 8px;
+  border-radius: 24px;
+  background: #222;
+  color: #fff;
+  font-weight: 700;
+}
+
+.tree-lab .tl-add:hover {
+  background: #444;
+}
+
+.tree-lab .tl-status {
+  min-height: 1.5em;
+  font-size: var(--body-font-size-s);
+  color: #1b6e35;
+}
+
+@media (width <= 600px) {
+  .tree-lab .tl-card {
+    grid-template-columns: 1fr;
+  }
+}
