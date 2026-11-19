@@ -22,3 +22,8 @@
   font-weight: 700;
   text-align: right;
 }
+
+.rental-price dd.rp-loading {
+  font-weight: 400;
+  color: #6e6e6e;
+}
