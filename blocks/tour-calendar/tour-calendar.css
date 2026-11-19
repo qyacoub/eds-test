@@ -1,0 +1,42 @@
+.tour-calendar {
+  max-width: 560px;
+  margin: 16px 0;
+  padding: 16px 20px;
+  border: 1px solid #d8d2c8;
+  border-radius: 8px;
+}
+
+.tour-calendar .tc-placeholder {
+  margin: 0;
+  padding: 24px 0;
+  color: #6e6e6e;
+  text-align: center;
+}
+
+.tour-calendar .tc-vendor {
+  margin: 0 0 8px;
+  font-size: var(--body-font-size-xs);
+  color: #6e6e6e;
+}
+
+.tour-calendar .tc-slots {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tour-calendar .tc-slots li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.tour-calendar .tc-state {
+  font-weight: 700;
+}
+
+.tour-calendar .tc-price {
+  margin: 12px 0 0;
+}

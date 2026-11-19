@@ -133,6 +133,8 @@ export default function decorate(block) {
     beacon('consent_choice', {
       choice, via, ...choices, seconds: secondsOnPage(),
     });
+    // Lets other blocks (tour-calendar) load what the choice allows.
+    window.dispatchEvent(new CustomEvent('consent-lab:choice', { detail: record }));
     open = false;
     root.remove();
     document.body.classList.remove('cl-locked');

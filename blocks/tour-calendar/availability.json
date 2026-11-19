@@ -1,0 +1,11 @@
+{
+  "vendor": "TourDesk",
+  "tour": "Old Port sunset ride",
+  "pricePerPerson": "$45",
+  "note": "taxes included",
+  "saturdays": [
+    { "status": "sold-out" },
+    { "status": "open", "departure": "4:15 pm", "seatsLeft": 6 },
+    { "status": "open", "departure": "4:15 pm", "seatsLeft": 12 }
+  ]
+}
